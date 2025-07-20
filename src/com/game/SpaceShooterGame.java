@@ -11,7 +11,6 @@ public class SpaceShooterGame extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // 直接调用父类 JFrame 的 add() 方法
         add(new GamePanel());
         setVisible(true);
     }
