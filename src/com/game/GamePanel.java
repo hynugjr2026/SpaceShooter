@@ -15,6 +15,7 @@ public class GamePanel extends JPanel implements ActionListener {
     private int score;
     private boolean gameOver;
     private Random random;
+    private int lives;
 
     public GamePanel() {
         setPreferredSize(new Dimension(800, 600));
@@ -35,6 +36,7 @@ public class GamePanel extends JPanel implements ActionListener {
         bullets = new ArrayList<>();
         powerUps = new ArrayList<>();
         score = 0;
+        lives = 3;
         gameOver = false;
     }
 
@@ -60,6 +62,7 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 20));
         g.drawString("分数: " + score, 20, 30);
+        g.drawString("生命: " + lives, 20, 60);
     }
 
     private void drawGameOver(Graphics g) {
@@ -104,6 +107,8 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     private void checkCollisions() {
+        Rectangle playerBounds = player.getBounds();
+
         // 子弹与敌人碰撞
         for (Bullet bullet : new ArrayList<>(bullets)) {
             Rectangle bulletBounds = bullet.getBounds();
@@ -121,10 +126,14 @@ public class GamePanel extends JPanel implements ActionListener {
         }
 
         // 玩家与敌人碰撞
-        Rectangle playerBounds = new Rectangle(player.getX(), player.getY(), 50, 30);
         for (Enemy enemy : new ArrayList<>(enemies)) {
             if (playerBounds.intersects(enemy.getBounds())) {
-                gameOver = true;
+                enemies.remove(enemy);
+                lives--;
+                if (lives <= 0) {
+                    gameOver = true;
+                    timer.stop();
+                }
                 break;
             }
         }
@@ -133,11 +142,15 @@ public class GamePanel extends JPanel implements ActionListener {
         for (PowerUp powerUp : new ArrayList<>(powerUps)) {
             if (playerBounds.intersects(powerUp.getBounds())) {
                 powerUps.remove(powerUp);
-                // 根据道具类型处理效果
                 switch (powerUp.getType()) {
-                    case HEALTH -> { /* 增加生命值 */ }
-                    case DOUBLE_SHOT -> { /* 双发子弹 */ }
-                    case SHIELD -> { /* 护盾 */ }
+                    case HEALTH -> lives = Math.min(3, lives + 1);
+                    case DOUBLE_SHOT -> {
+                        bullets.add(new Bullet(player.getX() + 15, player.getY()));
+                        bullets.add(new Bullet(player.getX() + 35, player.getY()));
+                    }
+                    case SHIELD -> {
+                        // 护盾效果可以在这里实现
+                    }
                 }
                 break;
             }
@@ -145,7 +158,7 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     private void spawnEnemies() {
-        if (random.nextInt(100) < 2) { // 2%的几率生成敌人
+        if (random.nextInt(100) < 3) {
             int x = random.nextInt(760);
             int speed = random.nextInt(3) + 1;
             int health = random.nextInt(2) + 1;
@@ -154,7 +167,7 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     private void spawnPowerUps() {
-        if (random.nextInt(500) < 1) { // 0.2%的几率生成道具
+        if (random.nextInt(500) < 1) {
             int x = random.nextInt(770);
             PowerUp.PowerUpType type = PowerUp.PowerUpType.values()[
                     random.nextInt(PowerUp.PowerUpType.values().length)];
@@ -171,17 +184,13 @@ public class GamePanel extends JPanel implements ActionListener {
             }
             if (gameOver && e.getKeyCode() == KeyEvent.VK_R) {
                 initGame();
+                timer.start();
             }
         }
 
         @Override
         public void keyReleased(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                player.keyReleased(KeyEvent.VK_LEFT);
-            }
-            if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                player.keyReleased(KeyEvent.VK_RIGHT);
-            }
+            player.keyReleased(e);
         }
     }
 }
