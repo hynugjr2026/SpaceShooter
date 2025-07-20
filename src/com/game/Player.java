@@ -7,6 +7,8 @@ public class Player {
     private int x, y;
     private final int speed = 5;
     private boolean leftPressed, rightPressed;
+    private final int width = 50;
+    private final int height = 30;
 
     public Player(int x, int y) {
         this.x = x;
@@ -20,7 +22,7 @@ public class Player {
 
     public void draw(Graphics g) {
         g.setColor(Color.BLUE);
-        g.fillRect(x, y, 50, 30);
+        g.fillRect(x, y, width, height);
     }
 
     public void keyPressed(KeyEvent e) {
@@ -28,9 +30,13 @@ public class Player {
         if (e.getKeyCode() == KeyEvent.VK_RIGHT) rightPressed = true;
     }
 
-    public void keyReleased(int keyCode) {
-        if (keyCode == KeyEvent.VK_LEFT) leftPressed = false;
-        if (keyCode == KeyEvent.VK_RIGHT) rightPressed = false;
+    public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_LEFT) leftPressed = false;
+        if (e.getKeyCode() == KeyEvent.VK_RIGHT) rightPressed = false;
+    }
+
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, width, height);
     }
 
     // Getters
